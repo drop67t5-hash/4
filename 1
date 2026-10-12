@@ -1,0 +1,74 @@
+-- โหลด Rayfield UI Library
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+
+-- สร้างหน้าต่างหลักของ UI
+local Window = Rayfield:CreateWindow({
+   Name = "Lucky Block Auto Spawner",
+   LoadingTitle = "กำลังโหลดระบบ...",
+   LoadingSubtitle = "โดย AI Collaborator",
+   ConfigurationSaving = {
+      Enabled = false,
+      FolderName = nil,
+      FileName = "LuckyBlockConfig"
+   },
+   Discord = {
+      Enabled = false,
+      Invite = "noinvite",
+      RememberJoins = true
+   },
+   KeySystem = false, -- ปิดระบบคีย์
+   KeySettings = {
+      Title = "Untitled",
+      Subtitle = "Key System",
+      Note = "No method of obtaining the key is provided",
+      FileName = "Key",
+      SaveKey = true,
+      GrabKeyFromSite = false,
+      Key = {"1234"}
+   }
+}
+
+-- สร้าง Tab และ Section
+local Tab = Window:CreateTab("หน้าหลัก", "home")
+local Section = Tab:CreateSection("ฟังก์ชันหลัก")
+
+-- ตัวแปรสำหรับควบคุมลูปเปิด-ปิด
+local isSpawning = false
+local spawnConnection
+
+-- ฟังก์ชันเปิด-ปิดการทำงาน
+local Toggle = Tab:CreateToggle({
+   Name = "เปิด/ปิด สปอนลักกี้บล็อก",
+   CurrentValue = false,
+   Flag = "SpawnToggle", -- A flag is the identifier for the configuration file, make sure every element has a different flag if you're using configuration saving
+   Callback = function(Value)
+      isSpawning = Value
+      
+      if isSpawning then
+         Rayfield:Notify({
+            Title = "แจ้งเตือน",
+            Content = "เปิดใช้งานระบบสปอนลักกี้บล็อกแล้ว!",
+            Duration = 3,
+            Image = 4483362458,
+         })
+         
+         -- เริ่มลูปส่ง RemoteEvent
+         task.spawn(function()
+            while isSpawning do
+               pcall(function()
+                  game:GetService("ReplicatedStorage"):WaitForChild("SpawnLuckyBlock"):FireServer()
+               end)
+               task.wait(0.5) -- หน่วงเวลา 0.5 วินาทีต่อครั้ง (ปรับเวลาได้ตามต้องการ)
+            end
+         end)
+      else
+         Rayfield:Notify({
+            Title = "แจ้งเตือน",
+            Content = "ปิดใช้งานระบบแล้ว",
+            Duration = 3,
+            Image = 4483362458,
+         })
+      end
+   end,
+})
+
